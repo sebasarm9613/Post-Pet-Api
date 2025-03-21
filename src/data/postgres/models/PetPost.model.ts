@@ -45,4 +45,9 @@ export class PetPost extends BaseEntity {
 		nullable: false,
 	})
 	created_at: Date;
+
+	@Column('varchar', {
+		nullable: false,
+	})
+	user_id: string;
 }

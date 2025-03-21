@@ -1,12 +1,11 @@
 import { regularExp } from '../../../config';
-import { UserRole } from '../../../data/postgres/models/user.model';
+// import { UserRole } from '../../../data/postgres/models/user.model';
 
 export class CreateUserDTO {
 	constructor(
 		public name: string,
 		public email: string,
-		public password: string,
-		public role: UserRole,
+		public password: string, // public role: UserRole,
 	) {}
 
 	static create(object: { [key: string]: any }): [string?, CreateUserDTO?] {
@@ -20,11 +19,11 @@ export class CreateUserDTO {
 			return [
 				'The password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, and one special character',
 			];
-		if (!role) return ['Missing role'];
-		if (role !== 'ADMIN' && role !== 'USER')
-			return [
-				"Invalid role. Role must be either 'ADMIN' or 'USER' in uppercase",
-			];
+		// if (!role) return ['Missing role'];
+		// if (role !== 'ADMIN' && role !== 'USER')
+		// 	return [
+		// 		"Invalid role. Role must be either 'ADMIN' or 'USER' in uppercase",
+		// 	];
 
 		return [
 			undefined,
@@ -32,7 +31,7 @@ export class CreateUserDTO {
 				name.trim().toLowerCase(),
 				email.trim().toLowerCase(),
 				password.trim(),
-				role,
+				// role,
 			),
 		];
 	}

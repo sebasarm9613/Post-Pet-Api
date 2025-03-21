@@ -6,6 +6,7 @@ import { UpdateUserDTO } from '../../domain/dtos/users/update-user.dto';
 export class UserService {
 	async findOne(id: string) {
 		const user = await User.findOne({
+			select: ['id', 'name', 'email', 'role'],
 			where: {
 				status: true,
 				id: id,
@@ -21,6 +22,7 @@ export class UserService {
 	async findAll() {
 		try {
 			const users = await User.find({
+				select: ['id', 'name', 'email', 'role'],
 				where: {
 					status: true,
 				},
@@ -37,7 +39,7 @@ export class UserService {
 		user.name = data.name;
 		user.email = data.email;
 		user.password = data.password;
-		user.role = data.role;
+		// user.role = data.role;
 
 		try {
 			return await user.save();
