@@ -1,6 +1,10 @@
+import { envs } from '../../config';
+import { encriptAdapter } from '../../config/bcrypt.adapter';
+import { JwtAdapter } from '../../config/jwt.adapter';
 import { User } from '../../data/postgres/models/user.model';
 import { CustomError } from '../../domain';
 import { CreateUserDTO } from '../../domain/dtos/users/create-user.dto';
+import { LoginUserDto } from '../../domain/dtos/users/login-user.dto';
 import { UpdateUserDTO } from '../../domain/dtos/users/update-user.dto';
 
 export class UserService {
@@ -38,7 +42,7 @@ export class UserService {
 
     user.name = data.name;
     user.email = data.email;
-    user.password = data.password;
+    user.password = encriptAdapter.hash(data.password);
     // user.role = data.role;
 
     try {
@@ -75,6 +79,57 @@ export class UserService {
     } catch (error) {
       throw CustomError.internalServer('Error deleting user');
     }
+  }
+
+  async login(credentials: LoginUserDto) {
+    const user = await this.ensureUserExist(credentials.email);
+
+    this.ensurePasswordIsCorrect(credentials.password, user.password);
+
+    const token = await this.generateToken(
+      { id: user!.id },
+      envs.JWT_EXPIRE_IN
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
+
+  private async ensureUserExist(email: string) {
+    const user = await User.findOne({
+      where: {
+        email: email,
+        status: true,
+      },
+    });
+
+    if (!user) {
+      throw CustomError.notFound('User not found');
+    }
+    return user;
+  }
+
+  private ensurePasswordIsCorrect(
+    unHashedPassword: string,
+    hashedPassword: string
+  ) {
+    const isMatch = encriptAdapter.compare(unHashedPassword, hashedPassword);
+
+    if (!isMatch) {
+      throw CustomError.unAutorized('Invalid credentials');
+    }
+  }
+
+  private async generateToken(payload: any, duration: string) {
+    const token = await JwtAdapter.generateToken(payload, duration);
+    if (!token) throw CustomError.internalServer('Error while creating JWT');
+    return token;
   }
 }
 
