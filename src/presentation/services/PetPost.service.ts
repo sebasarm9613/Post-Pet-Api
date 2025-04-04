@@ -1,13 +1,25 @@
 import { PetPost, PostStatus } from '../../data/postgres/models/PetPost.model';
 import { CreatePetPostDTO, CustomError } from '../../domain';
 import { UpdatePetPostDTO } from '../../domain/dtos/petPost/update-petPost.dto';
+import { UserService } from './user.service';
 
 export class PetPostService {
+  constructor(private readonly finderUserService: UserService) {}
   async findAll() {
     try {
       return await PetPost.find({
         where: {
           // status: PostStatus.PENDING,
+        },
+        relations: {
+          user: true,
+        },
+        select: {
+          user: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
       });
     } catch (error) {
@@ -21,6 +33,16 @@ export class PetPostService {
         // status: PostStatus.PENDING,
         id,
       },
+      relations: {
+        user: true,
+      },
+      select: {
+        user: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     });
 
     if (!petPost) {
@@ -29,13 +51,14 @@ export class PetPostService {
     return petPost;
   }
 
-  async create(data: CreatePetPostDTO) {
+  async create(data: CreatePetPostDTO, userId: string) {
     const petPost = new PetPost();
+    const user = await this.finderUserService.findOne(userId);
 
     petPost.pet_name = data.pet_name;
     petPost.description = data.description;
     petPost.image_url = data.image_url;
-    petPost.user_id = data.user_id;
+    petPost.user = user;
 
     try {
       return await petPost.save();

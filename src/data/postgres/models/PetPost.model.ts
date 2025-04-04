@@ -1,53 +1,58 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from './user.model';
 
 export enum PostStatus {
-	PENDING = 'PENDING',
-	APPROVED = 'APPROVED',
-	REJECTED = 'REJECTED',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
 @Entity()
 export class PetPost extends BaseEntity {
-	@PrimaryGeneratedColumn('uuid')
-	id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-	@Column('varchar', {
-		length: 60,
-		nullable: false,
-	})
-	pet_name: string;
+  @Column('varchar', {
+    length: 60,
+    nullable: false,
+  })
+  pet_name: string;
 
-	@Column('text', {
-		nullable: false,
-	})
-	description: string;
+  @Column('text', {
+    nullable: false,
+  })
+  description: string;
 
-	@Column('varchar', {
-		length: 255,
-		nullable: true,
-	})
-	image_url: string;
+  @Column('varchar', {
+    length: 255,
+    nullable: true,
+  })
+  image_url: string;
 
-	@Column('enum', {
-		enum: PostStatus,
-		default: PostStatus.PENDING,
-	})
-	status: PostStatus;
+  @Column('enum', {
+    enum: PostStatus,
+    default: PostStatus.PENDING,
+  })
+  status: PostStatus;
 
-	@Column('boolean', {
-		default: false,
-		nullable: false,
-	})
-	hasFounded: boolean;
+  @Column('boolean', {
+    default: false,
+    nullable: false,
+  })
+  hasFounded: boolean;
 
-	@Column('timestamp', {
-		default: () => 'CURRENT_TIMESTAMP',
-		nullable: false,
-	})
-	created_at: Date;
+  @Column('timestamp', {
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: false,
+  })
+  created_at: Date;
 
-	@Column('varchar', {
-		nullable: false,
-	})
-	user_id: string;
+  @ManyToOne(() => User, (user) => user.petPosts)
+  user: User;
 }
